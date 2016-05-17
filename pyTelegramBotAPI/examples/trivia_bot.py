@@ -12,7 +12,7 @@ TOKEN = '239988627:AAF_hGPeXGJ0nIwU1Trng9iHctlWiS0C2IE'
 knownUsers = []  # todo: save these in a file,
 userStep = {}  # so they won't reset every time the bot restarts
 
-questions = ["Is Kynaston awesome?", "Isn't telegram cool?", "What loses its head in the morning and gets it back at night?",
+questions = ["What loses its head in the morning and gets it back at night?",
             "What can you catch but not throw?", "Give me food, and I will live. Give me water, and I will die. What am I?",
             "What is the center of gravity?", "I'm many people's favorite place, even though many don't remember their stay. You'll love to come but hate to leave, if you get cold use my sleeves. What am I?",
             "What's orange and sounds like a parrot?", "What is so delicate that even mentioning it breaks it?", "You use a knife to slice my head and weep beside me when I am dead. What am I?",
@@ -26,7 +26,7 @@ questions = ["Is Kynaston awesome?", "Isn't telegram cool?", "What loses its hea
             "I cannot hear or see, but sense light and sounds there may be. Sometimes i end up on the hook, or even deep inside a book. What am I?"
             ]
 
-answers = ["yes", "yes", "pillow", "cold", "fire", "v", "bed", "carrot", "silence", "onion", "needle", "breath", "clock", "voice", "tombstone", "library",
+answers = ["pillow", "cold", "fire", "v", "bed", "carrot", "silence", "onion", "needle", "breath", "clock", "voice", "tombstone", "library",
             "refrigerator", "television", "e", "window", "pupil", "worm"
 
 ]
@@ -42,10 +42,17 @@ commands = {  # command description used in the "help" command
 }
 
 
-r = random.randint(0, len(questions)-1)
+r = random.randint(0, len(questions))
+score = 0
+maxRounds = 5
+currentRound = 1
 
-imageSelect = types.ReplyKeyboardMarkup(one_time_keyboard=True)  # create the image selection keyboard
-imageSelect.add('A', 'B', 'C','D')
+menu = types.ReplyKeyboardMarkup(one_time_keyboard=False)  # create the menu
+menu.add('Skip', 'Hint')
+
+numberOfRounds = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+numberOfRounds.add('3', '5', '10')
+
 
 hideBoard = types.ReplyKeyboardHide()  # if sent as reply_markup, will hide the keyboard
 
@@ -64,7 +71,7 @@ def get_user_step(uid):
 
 def generate_rand():
     global r
-    r = random.randint(0, len(questions)-1)
+    r = random.randint(0, len(questions))
 
 # only used for console output now
 def listener(messages):
@@ -74,7 +81,7 @@ def listener(messages):
     for m in messages:
         if m.content_type == 'text':
             # print the sent message to the console
-            print str(m.chat.first_name) + " [" + str(m.chat.id) + "]: " + m.text
+            print str(m.chat.first_name) + " [" + str(m.chat.id) + "]: " + m.text + str(len(questions)) + str(len(answers))
 
 
 bot = telebot.TeleBot(TOKEN)
@@ -154,60 +161,65 @@ def get_answer(m):
     bot.send_message(cid, "Great! I've recorded the question.")
 
 
+
 # user can start the trivia
 @bot.message_handler(commands=['play'])
 def play_trivia(m):
     cid = m.chat.id
+    text = m.text.lower()
     bot.send_message(cid, "Welcome to a new game of trivia, " + m.chat.first_name + "!")
     bot.send_chat_action(cid, 'typing')
-    bot.send_message(cid, "Type start when you are ready!")
+    bot.send_message(cid, "How many rounds do you want to play? You can type a number too.", reply_markup = numberOfRounds)
+    userStep[cid] = 3
 
-@bot.message_handler(func=lambda message: message.text.lower() == 'start')
+@bot.message_handler(func=lambda message: get_user_step(message.chat.id) == 3)
+def setRounds(m):
+	global maxRounds
+	cid = m.chat.id
+	text = m.text.lower()
+	maxRounds = int(text)
+	bot.send_message(cid, "Okay " + str(maxRounds) + " rounds. Type 'go' to start the game!")
+	userStep[cid] = 0
+
+
+@bot.message_handler(func=lambda message: message.text.lower() == 'go')
 def give_question(m):
     cid = m.chat.id
-    generate_rand()
-    bot.send_message(cid, "Question: " + str(questions[r]))
-    userStep[cid] = 4
+    global currentRound, maxRounds, score
+    if currentRound != maxRounds+1:
+    	generate_rand()
+        bot.send_message(cid, "Question: " + str(questions[r]), reply_markup = menu)
+        userStep[cid] = 4
+    else:
+		bot.send_message(cid, m.chat.first_name + ", thank you for playing. Your score is:", reply_markup = hideBoard)
+		bot.send_chat_action(cid, 'typing')
+		bot.send_message(cid, str(score) + "!")
+		currentRound = 1
 
 @bot.message_handler(func=lambda message: get_user_step(message.chat.id) == 4)
 def check_ans(m):
     cid = m.chat.id
     text = m.text.lower()
+    global currentRound, score
 
     if text == str(answers[r]):
-        bot.send_message(cid, "Correct! Next question.")
-        bot.send_chat_action(cid, 'typing')
-        give_question(m)
+    	score += 10
+    	currentRound += 1
+    	bot.send_message(cid, "Correct!")
+    	bot.send_chat_action(cid, 'typing')
+    	give_question(m)
+    elif text == 'skip':
+		score -= 3
+		bot.send_message(cid, "Question skipped.")
+		give_question(m)
+    elif text == 'hint':
+        score -= 2
+        bot.send_message(cid, str(len(str(answers[r]))) + " characters!", reply_markup = menu)
     else:
-        bot.send_message(cid, "Wrong! Try again.")
-
-# user can chose an image (multi-stage command example)
-@bot.message_handler(commands=['getImage'])
-def command_image(m):
-    cid = m.chat.id
-    bot.send_message(cid, "Which do you prefer?", reply_markup=imageSelect)  # show the keyboard
-    userStep[cid] = 4  # set the user to the next step (expecting a reply in the listener now)
+        bot.send_message(cid, "Wrong! Try again.", reply_markup = menu)
 
 
-# if the user has issued the "/getImage" command, process the answer
-@bot.message_handler(func=lambda message: get_user_step(message.chat.id) == 5)
-def msg_image_select(m):
-    cid = m.chat.id
-    text = m.text
 
-    # for some reason the 'upload_photo' status isn't quite working (doesn't show at all)
-    bot.send_chat_action(cid, 'upload_photo')
-
-    if text == "A":  # send the appropriate image based on the reply to the "/getImage" command
-        bot.send_photo(cid, open('rooster.jpg', 'rb'),
-                       reply_markup=hideBoard)  # send file and hide keyboard, after image is sent
-        userStep[cid] = 0  # reset the users step back to 0
-    elif text == "B":
-        bot.send_photo(cid, open('kitten.jpg', 'rb'), reply_markup=hideBoard)
-        userStep[cid] = 0
-    else:
-        bot.send_message(cid, "Don't type bullsh*t, if I give you a predefined keyboard!")
-        bot.send_message(cid, "Please try again")
 
 
 # filter on a specific message
