@@ -8,4 +8,4 @@
   - Add query results for different versions 
 
 # Upcoming Features
-  - Suggest verses based on keywords (e.g love returns 1 Cor 13:4)
+  - Suggest verses based on keywords (e.g. Searching for 'love' returns 1 Cor 13:4 as a result)
