@@ -3,6 +3,6 @@
 
 
 # Backlog
-  Download bible versions and save as text files
-  Format bible text files into usable format
-  Add 
+  - Download bible versions and save as text files
+  - Format bible text files into usable format
+  - Add query results for different versions 
