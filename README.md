@@ -9,3 +9,4 @@
 
 # Upcoming Features
   - Suggest verses based on keywords (e.g. Searching for 'love' returns 1 Cor 13:4 as a result)
+  - PM Mode as a QT Helper
