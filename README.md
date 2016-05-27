@@ -1,4 +1,4 @@
-# Version 0.0 (Beta)
+# Version 0.0 (Alpha)
   - Search verse with inline query
 
 
