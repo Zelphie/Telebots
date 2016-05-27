@@ -1,4 +1,9 @@
-# This example show how to write an inline mode telegramt bot use pyTelegramBotAPI.
+
+##################################################
+# CAUTION! PRODUCTION READY VERSE SEARCH BOT     # 
+# USE VERSE_SEARCH_TEST.PY FOR TESTING           #
+##################################################
+
 import telebot
 import time
 import sys
