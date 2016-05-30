@@ -5,7 +5,7 @@
 # Backlog
   - Download bible versions and save as text files (1 out of 5 done)
   - Format bible text files into usable format (1 out of 5 done)
-  - Add searching for a range of verses (e.g. John 3:16-20)
+  ~~- Add searching for a range of verses (e.g. John 3:16-20)~~
   - Fix formatting issues in display of results
   - Add error handlers when search fails
 
