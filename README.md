@@ -1,7 +1,7 @@
 # Version 0.0.2 (Alpha) 30/05/2016
   - Add searching for a range of verses (e.g. John 3:16-20)
 
-# Version 0.0.1 (Alpha) 28/05/2016
+## Version 0.0.1 (Alpha) 28/05/2016
   - Added KJV bible that is hosted locally
   - Search now returns 2 results: NIV and KJV
 
