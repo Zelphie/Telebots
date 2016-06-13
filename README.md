@@ -10,6 +10,7 @@
   - Format bible text files into usable format (1 out of 5 done)
   - Fix formatting issues in display of results
   - Add error handlers when search fails
+  - Write another script to restart this script when it terminates
 
 
 ## Upcoming Features
